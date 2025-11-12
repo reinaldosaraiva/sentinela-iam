@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Mock Keycloak Service
+  mock-keycloak:
+    build:
+      context: .
+      dockerfile: Dockerfile.mock-keycloak
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    volumes:
+      - ./mock_keycloak.py:/app/mock_keycloak.py
+      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+    networks:
+      - sentinela-network
+    command: python mock_keycloak.py
+
+  # Policy API Service
+  policy-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.policy-api
+    ports:
+      - "8001:8001"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - KEYCLOAK_URL=http://mock-keycloak:8080
+    volumes:
+      - ./working_policy_api_flask.py:/app/working_policy_api_flask.py
+      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+    depends_on:
+      - mock-keycloak
+    networks:
+      - sentinela-network
+    command: python working_policy_api_flask.py
+
+  # Business API Service
+  business-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.business-api
+    ports:
+      - "8002:8002"
+    environment:
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+      - KEYCLOAK_URL=http://mock-keycloak:8080
+      - POLICY_API_URL=http://policy-api:8001
+    volumes:
+      - ./working_business_api_flask.py:/app/working_business_api_flask.py
+      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+    depends_on:
+      - mock-keycloak
+      - policy-api
+    networks:
+      - sentinela-network
+    command: python working_business_api_flask.py
+
+  # Next.js UI (Development Mode)
+  sentinela-ui:
+    image: node:18-alpine
+    ports:
+      - "3001:3000"
+    environment:
+      - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
+      - NEXT_PUBLIC_POLICY_API_URL=http://localhost:8001
+      - NEXT_PUBLIC_BUSINESS_API_URL=http://localhost:8002
+      - NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+    volumes:
+      - ./sentinela-ui:/app
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    depends_on:
+      - mock-keycloak
+      - policy-api
+      - business-api
+    networks:
+      - sentinela-network
+
+networks:
+  sentinela-network:
+    driver: bridge

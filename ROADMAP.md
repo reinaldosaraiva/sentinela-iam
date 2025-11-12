@@ -1,261 +1,261 @@
 # Roadmap - Sentinela IAM Platform
 
-**Versão Atual:** v1.0.0
-**Última Atualização:** 12 de Novembro de 2025
+**Current Version:** v1.0.0
+**Last Updated:** November 12, 2025
 
 ---
 
-## Índice
-- [Visão Geral](#visão-geral)
-- [v1.1 - Melhorias Imediatas](#v11---melhorias-imediatas-próximas-2-semanas)
-- [v2.0 - Gerenciamento Completo](#v20---gerenciamento-completo-próximos-2-meses)
-- [v2.5 - Políticas e Auditoria](#v25---políticas-e-auditoria-próximos-4-meses)
-- [v3.0 - Enterprise Features](#v30---enterprise-features-próximos-6-meses)
-- [Backlog de Ideias](#backlog-de-ideias)
-- [Melhorias Técnicas](#melhorias-técnicas)
+## Table of Contents
+- [Overview](#overview)
+- [v1.1 - Immediate Improvements](#v11---immediate-improvements-next-2-weeks)
+- [v2.0 - Complete Management](#v20---complete-management-next-2-months)
+- [v2.5 - Policies and Audit](#v25---policies-and-audit-next-4-months)
+- [v3.0 - Enterprise Features](#v30---enterprise-features-next-6-months)
+- [Ideas Backlog](#ideas-backlog)
+- [Technical Improvements](#technical-improvements)
 
 ---
 
-## Visão Geral
+## Overview
 
-Este roadmap define a evolução do Sentinela IAM Platform, priorizando funcionalidades que agregam valor aos usuários e melhoram a segurança, performance e usabilidade do sistema.
+This roadmap defines the evolution of the Sentinela IAM Platform, prioritizing features that add value to users and improve system security, performance, and usability.
 
-### Princípios de Desenvolvimento
+### Development Principles
 
-- 🎯 **User-First**: Funcionalidades baseadas em feedback de usuários
-- 🔐 **Security by Design**: Segurança em todas as camadas
-- 🚀 **Performance Matters**: Otimização contínua
-- 📚 **Documentation First**: Documentação atualizada sempre
-- 🧪 **Test Coverage**: Cobertura de testes mínima de 80%
+- 🎯 **User-First**: Features based on user feedback
+- 🔐 **Security by Design**: Security at all layers
+- 🚀 **Performance Matters**: Continuous optimization
+- 📚 **Documentation First**: Always up-to-date documentation
+- 🧪 **Test Coverage**: Minimum 80% test coverage
 
 ---
 
-## v1.1 - Melhorias Imediatas (Próximas 2 semanas)
+## v1.1 - Immediate Improvements (Next 2 weeks)
 
-### Funcionalidades
+### Features
 
-#### 1. Gerenciamento de Usuários e Grupos
-**Prioridade:** Alta
-**Esforço:** Médio
+#### 1. User and Group Management
+**Priority:** High
+**Effort:** Medium
 
-- [ ] **CRUD de Usuários**
-  - Criação, edição e exclusão de usuários
-  - Upload de foto de perfil
-  - Gestão de informações pessoais
-  - Status ativo/inativo/bloqueado
-  - Reset de senha pelo admin
+- [ ] **User CRUD**
+  - User creation, editing, and deletion
+  - Profile photo upload
+  - Personal information management
+  - Active/inactive/blocked status
+  - Admin password reset
 
-- [ ] **CRUD de Grupos**
-  - Criação de grupos organizacionais
-  - Descrição e metadados
-  - Hierarquia de grupos (grupos pai/filho)
-  - Contadores de membros
+- [ ] **Group CRUD**
+  - Creation of organizational groups
+  - Description and metadata
+  - Group hierarchy (parent/child groups)
+  - Member counters
 
-- [ ] **Associação Usuário-Grupo**
-  - Adicionar/remover usuários em grupos
-  - Visualização de membros do grupo
-  - Operações em lote
+- [ ] **User-Group Association**
+  - Add/remove users in groups
+  - Group member view
+  - Batch operations
 
-#### 2. Melhorias de UX
-**Prioridade:** Alta
-**Esforço:** Baixo
+#### 2. UX Improvements
+**Priority:** High
+**Effort:** Low
 
 - [ ] **Toast Notifications**
-  - Substituir `alert()` por toasts modernos
-  - Biblioteca: react-hot-toast ou sonner
-  - Tipos: success, error, warning, info
+  - Replace `alert()` with modern toasts
+  - Library: react-hot-toast or sonner
+  - Types: success, error, warning, info
 
 - [ ] **Loading States**
-  - Skeletons durante carregamento
+  - Skeletons during loading
   - Progress indicators
-  - Desabilitar botões durante operações
+  - Disable buttons during operations
 
-- [ ] **Confirmações Modernas**
-  - Modal de confirmação customizado
-  - Substituir `confirm()` nativo
-  - Explicações claras das ações
+- [ ] **Modern Confirmations**
+  - Custom confirmation modal
+  - Replace native `confirm()`
+  - Clear action explanations
 
-#### 3. Filtros Avançados
-**Prioridade:** Média
-**Esforço:** Baixo
+#### 3. Advanced Filters
+**Priority:** Medium
+**Effort:** Low
 
-- [ ] **Filtros Combinados**
-  - Múltiplos filtros simultâneos
-  - Filtro por data de criação
-  - Ordenação por campos
-  - Salvar preferências de filtro
+- [ ] **Combined Filters**
+  - Multiple simultaneous filters
+  - Creation date filter
+  - Field sorting
+  - Save filter preferences
 
-### Melhorias Técnicas
+### Technical Improvements
 
-- [ ] **Validação de Formulários**
-  - Biblioteca: react-hook-form + zod
-  - Validação em tempo real
-  - Mensagens de erro claras
+- [ ] **Form Validation**
+  - Library: react-hook-form + zod
+  - Real-time validation
+  - Clear error messages
 
-- [ ] **Error Handling Melhorado**
-  - Error boundaries no React
-  - Página de erro personalizada
-  - Logging de erros
+- [ ] **Improved Error Handling**
+  - React error boundaries
+  - Custom error page
+  - Error logging
 
 ---
 
-## v2.0 - Gerenciamento Completo (Próximos 2 meses)
+## v2.0 - Complete Management (Next 2 months)
 
-### Funcionalidades
+### Features
 
-#### 1. Sistema de Políticas (RBAC)
-**Prioridade:** Alta
-**Esforço:** Alto
+#### 1. Policy System (RBAC)
+**Priority:** High
+**Effort:** High
 
-- [ ] **CRUD de Políticas**
-  - Criação de políticas de acesso
-  - Vinculação com recursos e ações
-  - Condições e regras
+- [ ] **Policy CRUD**
+  - Access policy creation
+  - Linking with resources and actions
+  - Conditions and rules
 
-- [ ] **Atribuição de Políticas**
-  - Atribuir políticas a usuários
-  - Atribuir políticas a grupos
-  - Herança de políticas
+- [ ] **Policy Assignment**
+  - Assign policies to users
+  - Assign policies to groups
+  - Policy inheritance
 
-- [ ] **Visualizador de Políticas**
-  - Matriz de permissões
-  - Visualização hierárquica
-  - Simulador de permissões
+- [ ] **Policy Viewer**
+  - Permission matrix
+  - Hierarchical visualization
+  - Permission simulator
 
-#### 2. Auditoria e Logs
-**Prioridade:** Alta
-**Esforço:** Médio
+#### 2. Audit and Logs
+**Priority:** High
+**Effort:** Medium
 
 - [ ] **Audit Trail**
-  - Log de todas as operações
-  - Registro de quem fez o que e quando
-  - Armazenamento imutável
+  - Log of all operations
+  - Record who did what and when
+  - Immutable storage
 
-- [ ] **Visualizador de Logs**
-  - Filtros por usuário, ação, data
-  - Export de logs (CSV, JSON)
-  - Busca de texto completo
+- [ ] **Log Viewer**
+  - Filters by user, action, date
+  - Export logs (CSV, JSON)
+  - Full-text search
 
-- [ ] **Alertas de Segurança**
-  - Detecção de atividades suspeitas
-  - Notificações em tempo real
-  - Dashboard de segurança
+- [ ] **Security Alerts**
+  - Suspicious activity detection
+  - Real-time notifications
+  - Security dashboard
 
-#### 3. Dashboard Analytics
-**Prioridade:** Média
-**Esforço:** Médio
+#### 3. Analytics Dashboard
+**Priority:** Medium
+**Effort:** Medium
 
-- [ ] **Métricas em Tempo Real**
-  - Usuários ativos
-  - Requisições por segundo
-  - Taxa de sucesso de autenticação
+- [ ] **Real-time Metrics**
+  - Active users
+  - Requests per second
+  - Authentication success rate
 
-- [ ] **Gráficos Interativos**
-  - Biblioteca: recharts ou Chart.js
-  - Gráficos de linha (tendências)
-  - Gráficos de pizza (distribuição)
-  - Gráficos de barra (comparações)
+- [ ] **Interactive Charts**
+  - Library: recharts or Chart.js
+  - Line charts (trends)
+  - Pie charts (distribution)
+  - Bar charts (comparisons)
 
-- [ ] **Relatórios Exportáveis**
-  - Export em PDF
-  - Export em Excel
-  - Agendamento de relatórios
+- [ ] **Exportable Reports**
+  - PDF export
+  - Excel export
+  - Report scheduling
 
 #### 4. API Keys Management
-**Prioridade:** Média
-**Esforço**: Baixo
+**Priority:** Medium
+**Effort**: Low
 
-- [ ] **CRUD de API Keys**
-  - Geração de chaves
-  - Rotação de chaves
-  - Expiração automática
+- [ ] **API Keys CRUD**
+  - Key generation
+  - Key rotation
+  - Automatic expiration
 
-- [ ] **Controle de Uso**
-  - Rate limiting por chave
-  - Quotas de requisições
-  - Estatísticas de uso
+- [ ] **Usage Control**
+  - Rate limiting per key
+  - Request quotas
+  - Usage statistics
 
-### Melhorias Técnicas
+### Technical Improvements
 
-- [ ] **Testes Automatizados**
-  - Testes unitários (Jest)
-  - Testes de integração (Pytest)
-  - Cobertura mínima de 80%
+- [ ] **Automated Tests**
+  - Unit tests (Jest)
+  - Integration tests (Pytest)
+  - Minimum 80% coverage
 
 - [ ] **CI/CD Pipeline**
   - GitHub Actions
-  - Build automático
-  - Deploy automático (staging/prod)
-  - Testes automáticos
+  - Automated build
+  - Automated deploy (staging/prod)
+  - Automated tests
 
 - [ ] **Docker Optimization**
   - Multi-stage builds
-  - Cache de layers
-  - Imagens menores
+  - Layer caching
+  - Smaller images
 
 ---
 
-## v2.5 - Políticas e Auditoria (Próximos 4 meses)
+## v2.5 - Policies and Audit (Next 4 months)
 
-### Funcionalidades
+### Features
 
 #### 1. Advanced Policy Engine
-**Prioridade:** Alta
-**Esforço:** Alto
+**Priority:** High
+**Effort:** High
 
 - [ ] **ABAC (Attribute-Based Access Control)**
-  - Políticas baseadas em atributos
-  - Contexto de requisição
-  - Regras condicionais complexas
+  - Attribute-based policies
+  - Request context
+  - Complex conditional rules
 
 - [ ] **Policy as Code**
-  - Definição de políticas em YAML/JSON
-  - Versionamento de políticas
-  - Import/Export de políticas
+  - Policy definition in YAML/JSON
+  - Policy versioning
+  - Policy import/export
 
 - [ ] **Policy Testing**
-  - Ambiente de teste de políticas
-  - Casos de teste automatizados
-  - Validação de sintaxe
+  - Policy testing environment
+  - Automated test cases
+  - Syntax validation
 
-#### 2. Integrações
-**Prioridade:** Alta
-**Esforço:** Alto
+#### 2. Integrations
+**Priority:** High
+**Effort:** High
 
 - [ ] **OAuth 2.0 / OpenID Connect**
-  - Login com Google
-  - Login com GitHub
-  - Login com Microsoft
-  - Login com provedor customizado
+  - Login with Google
+  - Login with GitHub
+  - Login with Microsoft
+  - Login with custom provider
 
 - [ ] **SAML 2.0**
-  - SSO empresarial
-  - Configuração de IdPs
-  - Mapeamento de atributos
+  - Enterprise SSO
+  - IdP configuration
+  - Attribute mapping
 
 - [ ] **LDAP/Active Directory**
-  - Sincronização de usuários
-  - Autenticação via LDAP
-  - Importação de grupos
+  - User synchronization
+  - Authentication via LDAP
+  - Group import
 
 #### 3. Multi-tenancy
-**Prioridade:** Média
-**Esforço:** Alto
+**Priority:** Medium
+**Effort:** High
 
-- [ ] **Organizações**
-  - Isolamento de dados
-  - Configurações por organização
-  - Billing por organização
+- [ ] **Organizations**
+  - Data isolation
+  - Per-organization settings
+  - Per-organization billing
 
 - [ ] **Workspaces**
-  - Múltiplos workspaces por org
-  - Compartilhamento entre workspaces
-  - Roles diferentes por workspace
+  - Multiple workspaces per org
+  - Cross-workspace sharing
+  - Different roles per workspace
 
-### Melhorias Técnicas
+### Technical Improvements
 
 - [ ] **Performance Optimization**
-  - Caching de políticas (Redis)
+  - Policy caching (Redis)
   - Query optimization
   - Connection pooling
 
@@ -266,13 +266,13 @@ Este roadmap define a evolução do Sentinela IAM Platform, priorizando funciona
 
 ---
 
-## v3.0 - Enterprise Features (Próximos 6 meses)
+## v3.0 - Enterprise Features (Next 6 months)
 
-### Funcionalidades
+### Features
 
 #### 1. Advanced Security
-**Prioridade:** Alta
-**Esforço:** Alto
+**Priority:** High
+**Effort:** High
 
 - [ ] **MFA (Multi-Factor Authentication)**
   - TOTP (Google Authenticator)
@@ -281,18 +281,18 @@ Este roadmap define a evolução do Sentinela IAM Platform, priorizando funciona
   - Backup codes
 
 - [ ] **Session Management**
-  - Listagem de sessões ativas
-  - Revogação de sessões
-  - Detecção de login suspeito
+  - Active session list
+  - Session revocation
+  - Suspicious login detection
 
 - [ ] **IP Whitelisting**
-  - Restrição por IP
-  - Geolocalização
-  - Bloqueio automático
+  - IP restriction
+  - Geolocation
+  - Automatic blocking
 
 #### 2. Compliance & Governance
-**Prioridade:** Alta
-**Esforço:** Alto
+**Priority:** High
+**Effort:** High
 
 - [ ] **Compliance Reports**
   - SOC 2
@@ -301,67 +301,67 @@ Este roadmap define a evolução do Sentinela IAM Platform, priorizando funciona
   - LGPD
 
 - [ ] **Data Retention Policies**
-  - Retenção automática de logs
-  - Arquivamento de dados
-  - Purge de dados antigos
+  - Automatic log retention
+  - Data archiving
+  - Old data purge
 
 - [ ] **Access Reviews**
-  - Revisão periódica de acessos
-  - Certificação de permissões
-  - Remoção automática de acessos não utilizados
+  - Periodic access reviews
+  - Permission certification
+  - Automatic removal of unused access
 
 #### 3. Advanced Features
-**Prioridade:** Média
-**Esforço:** Alto
+**Priority:** Medium
+**Effort:** High
 
 - [ ] **Workflow Engine**
-  - Aprovações de acesso
-  - Workflows customizáveis
-  - Notificações automáticas
+  - Access approvals
+  - Customizable workflows
+  - Automatic notifications
 
 - [ ] **Self-Service Portal**
-  - Requisição de acesso
-  - Catálogo de recursos
-  - Status de requisições
+  - Access requests
+  - Resource catalog
+  - Request status
 
 - [ ] **Risk Scoring**
-  - Score de risco por usuário
-  - Análise comportamental
-  - Machine learning para detecção de anomalias
+  - Risk score per user
+  - Behavioral analysis
+  - Machine learning for anomaly detection
 
-### Melhorias Técnicas
+### Technical Improvements
 
 - [ ] **High Availability**
   - Load balancing
-  - Failover automático
+  - Automatic failover
   - Disaster recovery
 
 - [ ] **Scalability**
   - Horizontal scaling
-  - Sharding de banco
+  - Database sharding
   - Microservices architecture
 
 ---
 
-## Backlog de Ideias
+## Ideas Backlog
 
 ### Interface & UX
-- [ ] Dark mode completo
-- [ ] Personalização de temas
-- [ ] Internacionalização (i18n)
+- [ ] Complete dark mode
+- [ ] Theme customization
+- [ ] Internationalization (i18n)
 - [ ] Mobile app (React Native)
-- [ ] Atalhos de teclado
-- [ ] Tour guiado para novos usuários
-- [ ] Templates de configuração rápida
+- [ ] Keyboard shortcuts
+- [ ] Guided tour for new users
+- [ ] Quick setup templates
 
-### Funcionalidades
+### Features
 - [ ] GraphQL API
-- [ ] Webhooks para eventos
-- [ ] Plugins system
-- [ ] Marketplace de integrações
+- [ ] Webhooks for events
+- [ ] Plugin system
+- [ ] Integration marketplace
 - [ ] AI-powered policy recommendations
-- [ ] Chatbot de suporte
-- [ ] Knowledge base integrada
+- [ ] Support chatbot
+- [ ] Integrated knowledge base
 
 ### DevOps
 - [ ] Terraform provider
@@ -372,25 +372,25 @@ Este roadmap define a evolução do Sentinela IAM Platform, priorizando funciona
 
 ---
 
-## Melhorias Técnicas
+## Technical Improvements
 
 ### Backend
 
-#### Curto Prazo (1-2 meses)
-- [ ] Implementar caching com Redis
-- [ ] Adicionar rate limiting
-- [ ] Melhorar tratamento de erros
-- [ ] Adicionar request validation middleware
-- [ ] Implementar API versioning
+#### Short Term (1-2 months)
+- [ ] Implement caching with Redis
+- [ ] Add rate limiting
+- [ ] Improve error handling
+- [ ] Add request validation middleware
+- [ ] Implement API versioning
 
-#### Médio Prazo (3-4 meses)
-- [ ] Migrar para arquitetura de eventos
-- [ ] Adicionar message queue (RabbitMQ/Kafka)
-- [ ] Implementar CQRS pattern
-- [ ] Background jobs com Celery
+#### Medium Term (3-4 months)
+- [ ] Migrate to event architecture
+- [ ] Add message queue (RabbitMQ/Kafka)
+- [ ] Implement CQRS pattern
+- [ ] Background jobs with Celery
 - [ ] Async task processing
 
-#### Longo Prazo (6+ meses)
+#### Long Term (6+ months)
 - [ ] Microservices migration
 - [ ] Service mesh (Istio)
 - [ ] Event sourcing
@@ -398,101 +398,101 @@ Este roadmap define a evolução do Sentinela IAM Platform, priorizando funciona
 
 ### Frontend
 
-#### Curto Prazo (1-2 meses)
-- [ ] Implementar Server Components onde possível
-- [ ] Adicionar Suspense boundaries
+#### Short Term (1-2 months)
+- [ ] Implement Server Components where possible
+- [ ] Add Suspense boundaries
 - [ ] Optimistic UI updates
-- [ ] Code splitting por rota
+- [ ] Code splitting per route
 - [ ] Image optimization
 
-#### Médio Prazo (3-4 meses)
+#### Medium Term (3-4 months)
 - [ ] PWA support
 - [ ] Offline mode
 - [ ] Service workers
-- [ ] Virtual scrolling para listas longas
+- [ ] Virtual scrolling for long lists
 - [ ] Bundle size optimization
 
-#### Longo Prazo (6+ meses)
+#### Long Term (6+ months)
 - [ ] Micro-frontends
 - [ ] Module federation
 - [ ] Design system library
-- [ ] Storybook para componentes
+- [ ] Storybook for components
 
 ### Database
 
-#### Curto Prazo (1-2 meses)
-- [ ] Adicionar índices otimizados
+#### Short Term (1-2 months)
+- [ ] Add optimized indexes
 - [ ] Query performance tuning
 - [ ] Database connection pooling
-- [ ] Soft deletes globais
+- [ ] Global soft deletes
 
-#### Médio Prazo (3-4 meses)
+#### Medium Term (3-4 months)
 - [ ] Read replicas
 - [ ] Database partitioning
 - [ ] Full-text search (Elasticsearch)
 - [ ] Time-series data (TimescaleDB)
 
-#### Longo Prazo (6+ meses)
+#### Long Term (6+ months)
 - [ ] Multi-region replication
-- [ ] Automated backups e restore
+- [ ] Automated backups and restore
 - [ ] Point-in-time recovery
 - [ ] Data encryption at rest
 
 ---
 
-## Processo de Implementação
+## Implementation Process
 
-### 1. Planejamento
-- Definir requisitos detalhados
-- Criar design docs
-- Estimar esforço
-- Priorizar features
+### 1. Planning
+- Define detailed requirements
+- Create design docs
+- Estimate effort
+- Prioritize features
 
-### 2. Desenvolvimento
-- Criar feature branch
-- Implementar com TDD
-- Code review obrigatório
-- Atualizar documentação
+### 2. Development
+- Create feature branch
+- Implement with TDD
+- Mandatory code review
+- Update documentation
 
-### 3. Testes
-- Testes unitários
-- Testes de integração
-- Testes E2E
+### 3. Testing
+- Unit tests
+- Integration tests
+- E2E tests
 - Performance testing
 
 ### 4. Deploy
-- Deploy em staging
+- Deploy to staging
 - QA testing
-- Deploy em produção
-- Monitoring pós-deploy
+- Deploy to production
+- Post-deploy monitoring
 
 ### 5. Feedback
-- Coletar feedback de usuários
-- Análise de métricas
-- Ajustes e melhorias
-- Próxima iteração
+- Collect user feedback
+- Metrics analysis
+- Adjustments and improvements
+- Next iteration
 
 ---
 
-## Contribuindo com o Roadmap
+## Contributing to the Roadmap
 
-Tem sugestões para o roadmap? Abra uma [issue no GitHub](https://github.com/seu-usuario/sentinela/issues) com a tag `roadmap` ou inicie uma [discussão](https://github.com/seu-usuario/sentinela/discussions).
+Have suggestions for the roadmap? Open an [issue on GitHub](https://github.com/reinaldosaraiva/sentinela-iam/issues) with the `roadmap` tag or start a [discussion](https://github.com/reinaldosaraiva/sentinela-iam/discussions).
 
-### Como Sugerir Features
+### How to Suggest Features
 
-1. Verifique se a feature já não está no roadmap
-2. Descreva o problema que a feature resolve
-3. Proponha uma solução
-4. Indique prioridade e esforço estimado
-5. Adicione mockups se possível
-
----
-
-## Licença
-
-Este roadmap é parte do projeto Sentinela e está sob a licença MIT.
+1. Check if the feature is not already on the roadmap
+2. Describe the problem the feature solves
+3. Propose a solution
+4. Indicate priority and estimated effort
+5. Add mockups if possible
 
 ---
 
-**Última Atualização:** 12 de Novembro de 2025
-**Próxima Revisão:** 12 de Dezembro de 2025
+## License
+
+This roadmap is part of the Sentinela project and is under the MIT license.
+
+---
+
+**Last Updated:** November 12, 2025
+**Next Review:** December 12, 2025

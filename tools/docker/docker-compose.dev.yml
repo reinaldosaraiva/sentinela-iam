@@ -1,85 +1,130 @@
-version: '3.8'
-
 services:
-  # Mock Keycloak Service
-  mock-keycloak:
-    build:
-      context: .
-      dockerfile: Dockerfile.mock-keycloak
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: sentinela-postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sentinela
+      - POSTGRES_USER=sentinela
+      - POSTGRES_PASSWORD=sentinela_secret
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sentinela-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinela"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Keycloak Server
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.0
+    container_name: sentinela-keycloak
     ports:
       - "8080:8080"
     environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin123
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://postgres:5432/sentinela
+      - KC_DB_USERNAME=sentinela
+      - KC_DB_PASSWORD=sentinela_secret
+      - KC_HOSTNAME=localhost
+      - KC_HOSTNAME_PORT=8080
+      - KC_HOSTNAME_STRICT_BACKCHANNEL=false
     volumes:
-      - ./mock_keycloak.py:/app/mock_keycloak.py
-      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+      - ./tools/scripts/setup:/opt/keycloak/setup:ro
     networks:
       - sentinela-network
-    command: python mock_keycloak.py
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: >
+      start-dev
+      --http-enabled=true
+      --import-realm
 
   # Policy API Service
   policy-api:
     build:
-      context: .
-      dockerfile: Dockerfile.policy-api
+      context: ../..
+      dockerfile: tools/docker/Dockerfile.policy-api
+    container_name: sentinela-policy-api
     ports:
       - "8001:8001"
     environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-      - KEYCLOAK_URL=http://mock-keycloak:8080
+      - DATABASE_URL=postgresql://sentinela:sentinela_secret@postgres:5432/sentinela
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=sentinela
+      - KEYCLOAK_CLIENT_ID=sentinela-api
+      - KEYCLOAK_CLIENT_SECRET=sentinela-secret
     volumes:
-      - ./working_policy_api_flask.py:/app/working_policy_api_flask.py
-      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+      - ../../apps/api/policy_api:/app
     depends_on:
-      - mock-keycloak
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
     networks:
       - sentinela-network
-    command: python working_policy_api_flask.py
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8001 --reload
 
   # Business API Service
   business-api:
     build:
-      context: .
-      dockerfile: Dockerfile.business-api
+      context: ../..
+      dockerfile: tools/docker/Dockerfile.business-api
+    container_name: sentinela-business-api
     ports:
       - "8002:8002"
     environment:
-      - FLASK_ENV=development
-      - FLASK_DEBUG=1
-      - KEYCLOAK_URL=http://mock-keycloak:8080
+      - DATABASE_URL=postgresql://sentinela:sentinela_secret@postgres:5432/sentinela
+      - KEYCLOAK_URL=http://keycloak:8080
+      - KEYCLOAK_REALM=sentinela
+      - KEYCLOAK_CLIENT_ID=sentinela-api
+      - KEYCLOAK_CLIENT_SECRET=sentinela-secret
       - POLICY_API_URL=http://policy-api:8001
     volumes:
-      - ./working_business_api_flask.py:/app/working_business_api_flask.py
-      - ./final_cedar_engine.py:/app/final_cedar_engine.py
+      - ../../apps/api/business_api:/app
     depends_on:
-      - mock-keycloak
-      - policy-api
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      policy-api:
+        condition: service_started
     networks:
       - sentinela-network
-    command: python working_business_api_flask.py
+    command: uvicorn src.main:app --host 0.0.0.0 --port 8002 --reload
 
-  # Next.js UI (Development Mode)
+  # Next.js UI
   sentinela-ui:
     image: node:18-alpine
+    container_name: sentinela-ui
     ports:
-      - "3001:3000"
+      - "3000:3000"
     environment:
       - NEXT_PUBLIC_API_BASE_URL=http://localhost:8000
       - NEXT_PUBLIC_POLICY_API_URL=http://localhost:8001
       - NEXT_PUBLIC_BUSINESS_API_URL=http://localhost:8002
       - NEXT_PUBLIC_KEYCLOAK_URL=http://localhost:8080
+      - NEXT_PUBLIC_KEYCLOAK_REALM=sentinela
     volumes:
-      - ./sentinela-ui:/app
+      - ../../apps/web/sentinela-ui:/app
     working_dir: /app
-    command: sh -c "npm install && npm run dev"
+    command: sh -c "npm install && npm run dev -- --hostname 0.0.0.0"
     depends_on:
-      - mock-keycloak
+      - keycloak
       - policy-api
       - business-api
     networks:
       - sentinela-network
+
+volumes:
+  postgres_data:
 
 networks:
   sentinela-network:

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Shield, FileText, Activity, TrendingUp, AlertTriangle, CheckCircle, Clock, BarChart3, PieChart, RefreshCw } from 'lucide-react';
+import { showToast } from '@/lib/toast';
 
 interface DashboardStats {
   totalPolicies: number;
@@ -381,6 +382,39 @@ export default function Dashboard() {
           </button>
         </div>
       </div>
+
+      {/* Toast Test Section - Development Only */}
+      {process.env.NODE_ENV === 'development' && (
+        <div className="mt-8 p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
+          <h3 className="text-lg font-semibold text-yellow-800 mb-4">🧪 Toast Testing (Development)</h3>
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => showToast.success('Success toast test!')}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Success Toast
+            </button>
+            <button
+              onClick={() => showToast.error('Error toast test!')}
+              className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+            >
+              Error Toast
+            </button>
+            <button
+              onClick={() => showToast.warning('Warning toast test!')}
+              className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+            >
+              Warning Toast
+            </button>
+            <button
+              onClick={() => showToast.info('Info toast test!')}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Info Toast
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

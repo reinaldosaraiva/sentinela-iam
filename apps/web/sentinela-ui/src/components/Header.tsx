@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, ReactNode } from 'react';
 import { Bell, Search, User, Settings, LogOut } from 'lucide-react';
 
 interface HeaderProps {
   title: string;
-  subtitle?: string;
+  subtitle?: string | ReactNode;
 }
 
 export default function Header({ title, subtitle }: HeaderProps) {

@@ -123,6 +123,63 @@ class KeycloakService:
             logger.error(f"Error getting user info: {e}")
             return None
     
+    async def authenticate_user(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """
+        Authenticate user with Keycloak using Resource Owner Password Credentials Grant
+        
+        Args:
+            username: User username or email
+            password: User password
+            
+        Returns:
+            Dict with authentication result if successful, None otherwise
+        """
+        try:
+            data = {
+                "grant_type": "password",
+                "client_id": "sentinela-api",
+                "client_secret": "sentinela-secret",
+                "username": username,
+                "password": password,
+                "scope": "openid email profile"
+            }
+            
+            headers = {
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
+            
+            response = await self.client.post(
+                f"{self.server_url}/realms/{self.realm}/protocol/openid-connect/token",
+                data=data,
+                headers=headers
+            )
+            
+            if response.status_code != 200:
+                logger.warning(f"Keycloak authentication failed: {response.status_code}")
+                return None
+            
+            token_data = response.json()
+            
+            # Get user info
+            user_info = await self.get_user_info(token_data.get("access_token"))
+            if not user_info:
+                return None
+            
+            return {
+                "access_token": token_data.get("access_token"),
+                "user": {
+                    "id": user_info.get("sub"),
+                    "username": user_info.get("preferred_username"),
+                    "email": user_info.get("email"),
+                    "name": user_info.get("name", ""),
+                    "email_verified": user_info.get("email_verified", False)
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Authentication error: {e}")
+            return None
+    
     async def close(self):
         """Close HTTP client"""
         await self.client.aclose()

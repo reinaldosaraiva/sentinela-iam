@@ -73,11 +73,59 @@ app.add_middleware(
 )
 
 # Include routers
-from routers import applications, resources, actions, auth
-app.include_router(auth.router, prefix="/api/v1")  # Auth router (no authentication required)
+from routers import applications, resources, actions
+try:
+    from routers import auth_keycloak
+    app.include_router(auth_keycloak.router, prefix="/api/v1")  # Keycloak auth router
+    print("Keycloak auth router included successfully")
+except Exception as e:
+    print(f"Failed to include Keycloak auth router: {e}")
+    # Fallback to regular auth
+    from routers import auth
+    app.include_router(auth.router, prefix="/api/v1")  # Regular auth router
 app.include_router(applications.router, prefix="/api/v1")
 app.include_router(resources.router, prefix="/api/v1")
 app.include_router(actions.router, prefix="/api/v1")
+
+# Include user router
+try:
+    from routers import users
+    app.include_router(users.router)  # User router already has prefix
+    print("User router included successfully")
+except Exception as e:
+    print(f"Failed to include user router: {e}")
+
+# Include group router
+try:
+    from routers import groups
+    app.include_router(groups.router)  # Group router already has prefix
+    print("Group router included successfully")
+except Exception as e:
+    print(f"Failed to include group router: {e}")
+
+# Include policies router
+try:
+    from routers import policies
+    app.include_router(policies.router)  # Policies router already has prefix
+    print("Policies router included successfully")
+except Exception as e:
+    print(f"Failed to include policies router: {e}")
+
+# Include Keycloak user management router
+try:
+    from routers import keycloak_users
+    app.include_router(keycloak_users.router)  # Keycloak users router
+    print("Keycloak users router included successfully")
+except Exception as e:
+    print(f"Failed to include Keycloak users router: {e}")
+
+# Include Keycloak group management router
+try:
+    from routers import keycloak_groups
+    app.include_router(keycloak_groups.router)  # Keycloak groups router
+    print("Keycloak groups router included successfully")
+except Exception as e:
+    print(f"Failed to include Keycloak groups router: {e}")
 
 
 # Health endpoints
@@ -109,104 +157,7 @@ async def detailed_health_check():
     }
 
 
-# Policy endpoints
-@app.get("/policies/")
-async def list_policies(skip: int = 0, limit: int = 100):
-    """List all policies"""
-    return policies_db[skip:skip+limit]
-
-
-@app.get("/policies/{policy_id}")
-async def get_policy(policy_id: int):
-    """Get a specific policy by ID"""
-    for policy in policies_db:
-        if policy["id"] == policy_id:
-            return policy
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Policy not found"
-    )
-
-
-@app.post("/policies/", status_code=status.HTTP_201_CREATED)
-async def create_policy(policy_data: dict):
-    """Create a new policy"""
-    global policy_id_counter
-    
-    new_policy = {
-        "id": policy_id_counter,
-        "name": policy_data.get("name"),
-        "description": policy_data.get("description"),
-        "content": policy_data.get("content"),
-        "version": "1.0.0",
-        "status": "draft",
-        "created_at": "2025-01-11T00:00:00Z",
-        "updated_at": "2025-01-11T00:00:00Z"
-    }
-    
-    policies_db.append(new_policy)
-    policy_id_counter += 1
-    
-    logger.info(f"Policy {new_policy['id']} created successfully")
-    return new_policy
-
-
-@app.put("/policies/{policy_id}")
-async def update_policy(policy_id: int, policy_data: dict):
-    """Update an existing policy"""
-    for i, policy in enumerate(policies_db):
-        if policy["id"] == policy_id:
-            # Update policy fields
-            for field, value in policy_data.items():
-                if value is not None:
-                    policy[field] = value
-            
-            policy["updated_at"] = "2025-01-11T00:00:00Z"
-            
-            # Increment version if content changed
-            if "content" in policy_data:
-                current_version = policy["version"].split(".")
-                current_version[-1] = str(int(current_version[-1]) + 1)
-                policy["version"] = ".".join(current_version)
-            
-            logger.info(f"Policy {policy_id} updated successfully")
-            return policy
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Policy not found"
-    )
-
-
-@app.delete("/policies/{policy_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_policy(policy_id: int):
-    """Delete a policy"""
-    for i, policy in enumerate(policies_db):
-        if policy["id"] == policy_id:
-            policies_db.pop(i)
-            logger.info(f"Policy {policy_id} deleted successfully")
-            return None
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Policy not found"
-    )
-
-
-@app.post("/policies/{policy_id}/publish")
-async def publish_policy(policy_id: int):
-    """Publish a policy (make it active)"""
-    for policy in policies_db:
-        if policy["id"] == policy_id:
-            policy["status"] = "active"
-            policy["updated_at"] = "2025-01-11T00:00:00Z"
-            logger.info(f"Policy {policy_id} published successfully")
-            return policy
-    
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail="Policy not found"
-    )
+# Policy endpoints are now handled by the policies router
 
 
 @app.get("/")

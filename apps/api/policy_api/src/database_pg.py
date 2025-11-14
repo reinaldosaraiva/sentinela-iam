@@ -10,7 +10,7 @@ import os
 # PostgreSQL connection
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://sentinela:sentinela_secret@localhost:5434/sentinela"
+    "postgresql://sentinela:sentinela_secret@localhost:5432/sentinela"
 )
 
 # Create database engine

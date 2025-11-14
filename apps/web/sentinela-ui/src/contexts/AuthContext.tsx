@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import authService, { User } from '@/lib/auth';
 import { useRouter, usePathname } from 'next/navigation';
+import { showToast } from '@/lib/toast';
 
 interface AuthContextType {
   user: User | null;
@@ -46,7 +47,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         }
       }
     } catch (error) {
-      console.error('Auth initialization error:', error);
+      showToast.error('Authentication initialization failed');
       setUser(null);
       if (pathname !== '/login') {
         router.push('/login');
@@ -77,7 +78,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       const currentUser = await authService.getCurrentUser();
       setUser(currentUser);
     } catch (error) {
-      console.error('Refresh user error:', error);
+      showToast.error('Failed to refresh user session');
       logout();
     }
   };

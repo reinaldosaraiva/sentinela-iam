@@ -1,0 +1,36 @@
+"""
+Authentication Pydantic Schemas for Business API
+"""
+
+from pydantic import BaseModel, EmailStr, Field
+from typing import List, Optional, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import ForwardRef
+
+
+class LoginRequest(BaseModel):
+    """Login request schema"""
+    email: EmailStr = Field(..., description="User email address")
+    password: str = Field(..., min_length=6, description="User password")
+
+
+class UserResponse(BaseModel):
+    """User response schema"""
+    email: EmailStr = Field(..., description="User email")
+    username: str = Field(..., description="Username")
+    full_name: str = Field(..., description="User full name")
+    is_active: bool = Field(..., description="User active status")
+    is_superuser: bool = Field(..., description="Superuser status")
+    groups: List[str] = Field(default=[], description="User groups")
+
+    class Config:
+        from_attributes = True
+
+
+class TokenResponse(BaseModel):
+    """Token response schema"""
+    access_token: str = Field(..., description="JWT access token")
+    token_type: str = Field(default="bearer", description="Token type")
+    expires_in: int = Field(..., description="Token expiration time in seconds")
+    user: UserResponse = Field(..., description="User information")

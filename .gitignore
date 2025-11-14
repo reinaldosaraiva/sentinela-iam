@@ -62,6 +62,10 @@ sentinela-ui/.next/
 sentinela-ui/out/
 sentinela-ui/build
 sentinela-ui/dist
+apps/web/sentinela-ui/.next/
+apps/web/sentinela-ui/out/
+apps/web/sentinela-ui/build
+apps/web/sentinela-ui/dist
 
 # Node
 sentinela-ui/node_modules/
@@ -69,6 +73,11 @@ sentinela-ui/npm-debug.log*
 sentinela-ui/yarn-debug.log*
 sentinela-ui/yarn-error.log*
 sentinela-ui/.pnpm-debug.log*
+apps/web/sentinela-ui/node_modules/
+apps/web/sentinela-ui/npm-debug.log*
+apps/web/sentinela-ui/yarn-debug.log*
+apps/web/sentinela-ui/yarn-error.log*
+apps/web/sentinela-ui/.pnpm-debug.log*
 
 # Dependency directories
 node_modules/
@@ -148,3 +157,15 @@ policy_api/alembic/versions/*.pyc
 # API Keys and secrets
 *.secret
 secrets.json
+
+# Test files
+test_*.py
+*_test.py
+test.html
+
+# Generated scripts
+/tmp/
+generate_hashes.py
+
+# Package lock files (opcional - descomentar se não quiser versionar)
+# package-lock.json

@@ -5,7 +5,7 @@ Pydantic schemas for Application
 from pydantic import BaseModel, Field, HttpUrl
 from typing import Optional
 from datetime import datetime
-from uuid import UUID
+# from uuid import UUID  # Temporarily commented for compatibility
 
 
 class ApplicationBase(BaseModel):
@@ -37,10 +37,10 @@ class ApplicationUpdate(BaseModel):
 
 class ApplicationResponse(ApplicationBase):
     """Schema for application response"""
-    id: UUID
-    created_at: datetime
-    updated_at: datetime
-    created_by: Optional[UUID] = None
+    id: int  # Temporarily int instead of UUID
+    created_at: Optional[datetime] = None  # Simplified
+    updated_at: Optional[datetime] = None  # Simplified
+    created_by: Optional[str] = None  # Temporarily string instead of UUID
     api_keys_count: int = 0
 
     class Config:

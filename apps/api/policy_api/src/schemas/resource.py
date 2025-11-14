@@ -5,7 +5,7 @@ Pydantic schemas for Resource
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
-from uuid import UUID
+# from uuid import UUID  # Temporarily commented for compatibility
 
 
 class ResourceBase(BaseModel):
@@ -18,7 +18,7 @@ class ResourceBase(BaseModel):
 
 class ResourceCreate(ResourceBase):
     """Schema for creating a resource"""
-    application_id: UUID = Field(..., description="Application ID this resource belongs to")
+    application_id: int = Field(..., description="Application ID this resource belongs to")  # Temporarily int
 
 
 class ResourceUpdate(BaseModel):
@@ -31,11 +31,11 @@ class ResourceUpdate(BaseModel):
 
 class ResourceResponse(ResourceBase):
     """Schema for resource response"""
-    id: UUID
-    application_id: UUID
-    created_at: datetime
-    updated_at: datetime
-    created_by: Optional[UUID] = None
+    id: int  # Temporarily int instead of UUID
+    application_id: int  # Temporarily int instead of UUID
+    created_at: Optional[datetime] = None  # Simplified
+    updated_at: Optional[datetime] = None  # Simplified
+    created_by: Optional[str] = None  # Temporarily string instead of UUID
     actions_count: int = 0
 
     class Config:

@@ -5,7 +5,7 @@ Pydantic schemas for Action
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
-from uuid import UUID
+# from uuid import UUID  # Temporarily commented for compatibility
 
 
 class ActionBase(BaseModel):
@@ -18,7 +18,7 @@ class ActionBase(BaseModel):
 
 class ActionCreate(ActionBase):
     """Schema for creating an action"""
-    resource_id: UUID = Field(..., description="Resource ID this action belongs to")
+    resource_id: int = Field(..., description="Resource ID this action belongs to")  # Temporarily int
 
 
 class ActionUpdate(BaseModel):
@@ -31,11 +31,11 @@ class ActionUpdate(BaseModel):
 
 class ActionResponse(ActionBase):
     """Schema for action response"""
-    id: UUID
-    resource_id: UUID
-    created_at: datetime
-    updated_at: datetime
-    created_by: Optional[UUID] = None
+    id: int  # Temporarily int instead of UUID
+    resource_id: int  # Temporarily int instead of UUID
+    created_at: Optional[datetime] = None  # Simplified
+    updated_at: Optional[datetime] = None  # Simplified
+    created_by: Optional[str] = None  # Temporarily string instead of UUID
 
     class Config:
         from_attributes = True

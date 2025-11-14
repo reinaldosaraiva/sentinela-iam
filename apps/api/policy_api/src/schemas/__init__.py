@@ -42,6 +42,53 @@ from .auth import (
     CurrentUser
 )
 
+from .user import (
+    UserBase,
+    UserCreate,
+    UserUpdate,
+    UserResponse,
+    UserListResponse,
+    UserStatusUpdate,
+    PasswordReset,
+    PasswordChange,
+    PhotoUpload,
+    UserSummary,
+    UserStatus,
+    UserRole
+)
+
+from .group import (
+    GroupBase,
+    GroupCreate,
+    GroupUpdate,
+    GroupResponse,
+    GroupListResponse,
+    GroupHierarchy,
+    GroupTree
+)
+
+from .policy import (
+    PolicyBase,
+    PolicyCreate,
+    PolicyUpdate,
+    PolicyResponse,
+    PolicyListResponse,
+    PolicyStatus,
+    PolicyValidationRequest,
+    PolicyValidationResponse
+)
+
+from .user_group import (
+    UserGroupBase,
+    UserGroupCreate,
+    UserGroupUpdate,
+    UserGroupResponse,
+    UserGroupListResponse,
+    GroupMembershipResponse,
+    UserMembershipResponse,
+    BulkUserGroupOperation
+)
+
 __all__ = [
     # Application schemas
     'ApplicationBase',
@@ -73,4 +120,42 @@ __all__ = [
     'TokenResponse',
     'UserResponse',
     'CurrentUser',
+    # User schemas
+    'UserBase',
+    'UserCreate',
+    'UserUpdate',
+    'UserListResponse',
+    'UserStatusUpdate',
+    'PasswordReset',
+    'PasswordChange',
+    'PhotoUpload',
+    'UserSummary',
+    'UserStatus',
+    'UserRole',
+    # Group schemas
+    'GroupBase',
+    'GroupCreate',
+    'GroupUpdate',
+    'GroupResponse',
+    'GroupListResponse',
+    'GroupHierarchy',
+    'GroupTree',
+    # Policy schemas
+    'PolicyBase',
+    'PolicyCreate',
+    'PolicyUpdate',
+    'PolicyResponse',
+    'PolicyListResponse',
+    'PolicyStatus',
+    'PolicyValidationRequest',
+    'PolicyValidationResponse',
+    # UserGroup schemas
+    'UserGroupBase',
+    'UserGroupCreate',
+    'UserGroupUpdate',
+    'UserGroupResponse',
+    'UserGroupListResponse',
+    'GroupMembershipResponse',
+    'UserMembershipResponse',
+    'BulkUserGroupOperation',
 ]

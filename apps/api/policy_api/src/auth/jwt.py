@@ -79,7 +79,7 @@ MOCK_USERS = {
         "email": "admin@sentinela.com",
         "username": "admin",
         "full_name": "Administrator",
-        "hashed_password": get_password_hash("admin123"),  # Password: admin123
+        "hashed_password": "$2b$12$.gbsUijNyINtmgF0mVKMqOFwXzFRRAIliuzvruw1AK6c3rb5KTGaq",  # Password: admin123
         "is_active": True,
         "is_superuser": True,
         "groups": ["admin", "developers"]
@@ -88,10 +88,28 @@ MOCK_USERS = {
         "email": "user@sentinela.com",
         "username": "user",
         "full_name": "Regular User",
-        "hashed_password": get_password_hash("user123"),  # Password: user123
+        "hashed_password": "$2b$12$nrB6Ov2DrF6kkbgbxK0d8.GfpKY0RQpCdwudfyW3lfhz8cZzBuwsS",  # Password: user123
         "is_active": True,
         "is_superuser": False,
         "groups": ["employees"]
+    },
+    "alice@sentinela.com": {
+        "email": "alice@sentinela.com",
+        "username": "alice",
+        "full_name": "Alice Smith",
+        "hashed_password": "$2b$12$fIkycEIWf1wTBeblkJ3hmeQ2ln7moSo4DGQmQreKYHCUuiSn51RVe",  # Password: alice123
+        "is_active": True,
+        "is_superuser": False,
+        "groups": ["employees"]
+    },
+    "bob@sentinela.com": {
+        "email": "bob@sentinela.com",
+        "username": "bob",
+        "full_name": "Bob Johnson",
+        "hashed_password": "$2b$12$jZBYL7HbA9vTuqxGX1NOS.WSCR3WE.7iSfa02ZFNtuHRhFWUTDmTe",  # Password: bob123
+        "is_active": True,
+        "is_superuser": False,
+        "groups": ["managers", "employees"]
     }
 }
 

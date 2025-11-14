@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { Plus, Search, Key, ExternalLink, Settings, Trash2, Loader2 } from 'lucide-react';
 import DashboardLayout from '../../components/DashboardLayout';
+import { showToast } from '@/lib/toast';
+import { PageLoader, CardSkeleton, GridSkeleton, LoadingButton } from '@/components/LoadingStates';
+import { ConfirmationModal } from '@/components/ConfirmationModal';
 
 interface Application {
   id: string;
@@ -27,6 +30,9 @@ export default function ApplicationsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [applicationToDelete, setApplicationToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,7 +55,7 @@ export default function ApplicationsPage() {
       const data = await response.json();
       setApplications(data.applications || []);
     } catch (error) {
-      console.error('Error loading applications:', error);
+      showToast.error('Failed to load applications');
     } finally {
       setLoading(false);
     }
@@ -79,36 +85,44 @@ export default function ApplicationsPage() {
           status: 'active',
           environment: 'development'
         });
+        showToast.success('Application created successfully');
       } else {
         const error = await response.json();
-        alert(`Error: ${error.detail || 'Failed to create application'}`);
+        showToast.error(`Error: ${error.detail || 'Failed to create application'}`);
       }
     } catch (error) {
-      console.error('Error creating application:', error);
-      alert('Failed to create application');
+      showToast.error('Failed to create application');
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDeleteApplication = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this application? This will also delete all associated API keys.')) {
-      return;
-    }
+  const handleDeleteApplication = (id: string) => {
+    setApplicationToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteApplication = async () => {
+    if (!applicationToDelete) return;
 
     try {
-      const response = await fetch(`${API_BASE_URL}/applications/${id}`, {
+      setDeleting(true);
+      const response = await fetch(`${API_BASE_URL}/applications/${applicationToDelete}`, {
         method: 'DELETE',
       });
 
       if (response.ok) {
-        setApplications(applications.filter(app => app.id !== id));
+        setApplications(applications.filter(app => app.id !== applicationToDelete));
+        showToast.success('Application deleted successfully');
+        setShowDeleteModal(false);
+        setApplicationToDelete(null);
       } else {
-        alert('Failed to delete application');
+        showToast.error('Failed to delete application');
       }
     } catch (error) {
-      console.error('Error deleting application:', error);
-      alert('Failed to delete application');
+      showToast.error('Failed to delete application');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -176,9 +190,7 @@ export default function ApplicationsPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
-          </div>
+          <PageLoader />
         ) : filteredApplications.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500">No applications found</p>
@@ -360,25 +372,35 @@ export default function ApplicationsPage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                  disabled={creating}
-                >
-                  {creating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Creating...
-                    </>
-                  ) : (
-                    'Create Application'
-                  )}
-                </button>
+                 <LoadingButton
+                   type="submit"
+                   loading={creating}
+                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                 >
+                   {creating ? '' : 'Create Application'}
+                 </LoadingButton>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          if (!deleting) {
+            setShowDeleteModal(false);
+            setApplicationToDelete(null);
+          }
+        }}
+        onConfirm={confirmDeleteApplication}
+        title="Delete Application"
+        message="Are you sure you want to delete this application? This will also delete all associated API keys. This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        loading={deleting}
+      />
     </DashboardLayout>
   );
 }

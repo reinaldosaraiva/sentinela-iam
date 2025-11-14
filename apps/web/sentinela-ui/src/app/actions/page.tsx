@@ -5,6 +5,9 @@ import { Plus, Search, Shield, Trash2, Edit, CheckCircle, XCircle, ExternalLink,
 import DashboardLayout from '../../components/DashboardLayout';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import apiClient from '@/lib/api';
+import { showToast } from '@/lib/toast';
+import { PageLoader, CardSkeleton, GridSkeleton, LoadingButton } from '@/components/LoadingStates';
+import { ConfirmationModal } from '@/components/ConfirmationModal';
 
 interface Resource {
   id: string;
@@ -38,6 +41,9 @@ export default function ActionsPage() {
   const [creating, setCreating] = useState(false);
   const [filterActive, setFilterActive] = useState<boolean | null>(null);
   const [filterResource, setFilterResource] = useState<string>('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [actionToDelete, setActionToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -59,7 +65,7 @@ export default function ActionsPage() {
       const data = await apiClient.get('/api/v1/resources/');
       setResources(data.resources || []);
     } catch (error) {
-      console.error('Error loading resources:', error);
+      showToast.error('Failed to load resources');
     }
   };
 
@@ -80,7 +86,7 @@ export default function ActionsPage() {
 
       setActions(actionsWithResource);
     } catch (error) {
-      console.error('Error loading actions:', error);
+      showToast.error('Failed to load actions');
     } finally {
       setLoading(false);
     }
@@ -108,25 +114,33 @@ export default function ActionsPage() {
         description: '',
         is_active: true
       });
+      showToast.success('Action created successfully');
     } catch (error) {
-      console.error('Error creating action:', error);
-      alert('Failed to create action');
+      showToast.error('Failed to create action');
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDeleteAction = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this action?')) {
-      return;
-    }
+  const handleDeleteAction = (id: string) => {
+    setActionToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteAction = async () => {
+    if (!actionToDelete) return;
 
     try {
-      await apiClient.delete(`/api/v1/actions/${id}`);
-      setActions(actions.filter(action => action.id !== id));
+      setDeleting(true);
+      await apiClient.delete(`/api/v1/actions/${actionToDelete}`);
+      setActions(actions.filter(action => action.id !== actionToDelete));
+      showToast.success('Action deleted successfully');
+      setShowDeleteModal(false);
+      setActionToDelete(null);
     } catch (error) {
-      console.error('Error deleting action:', error);
-      alert('Failed to delete action');
+      showToast.error('Failed to delete action');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -137,9 +151,9 @@ export default function ActionsPage() {
         method: 'PATCH',
       });
       await loadActions();
+      showToast.success(`Action ${action.is_active ? 'deactivated' : 'activated'} successfully`);
     } catch (error) {
-      console.error('Error updating action:', error);
-      alert('Failed to update action status');
+      showToast.error('Failed to update action status');
     }
   };
 
@@ -248,9 +262,7 @@ export default function ActionsPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          </div>
+          <PageLoader />
         ) : filteredActions.length === 0 ? (
           <div className="text-center py-12">
             <Shield className="mx-auto h-12 w-12 text-gray-400" />
@@ -451,18 +463,35 @@ export default function ActionsPage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                  disabled={creating}
-                >
-                  {creating ? 'Creating...' : 'Create Action'}
-                </button>
+                 <LoadingButton
+                   type="submit"
+                   loading={creating}
+                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                 >
+                   {creating ? '' : 'Create Action'}
+                 </LoadingButton>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          if (!deleting) {
+            setShowDeleteModal(false);
+            setActionToDelete(null);
+          }
+        }}
+        onConfirm={confirmDeleteAction}
+        title="Delete Action"
+        message="Are you sure you want to delete this action? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        loading={deleting}
+      />
       </DashboardLayout>
     </ProtectedRoute>
   );

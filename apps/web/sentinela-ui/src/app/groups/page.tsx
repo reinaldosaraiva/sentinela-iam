@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Users, Plus, Search, Shield, Trash2, Edit2 } from 'lucide-react';
 import Sidebar from '../../components/Sidebar';
 import Header from '../../components/Header';
+import { Spinner } from '@/components/LoadingStates';
 
 interface Group {
   id: string;
@@ -54,7 +55,10 @@ export default function GroupsPage() {
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Loading...</div>
+        <div className="flex flex-col items-center space-y-4">
+          <Spinner size="lg" />
+          <div className="text-white text-xl">Loading...</div>
+        </div>
       </div>
     );
   }

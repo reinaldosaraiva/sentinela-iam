@@ -5,6 +5,9 @@ import { Plus, Search, Shield, Trash2, Edit, CheckCircle, XCircle } from 'lucide
 import DashboardLayout from '../../components/DashboardLayout';
 import ProtectedRoute from '../../components/ProtectedRoute';
 import apiClient from '@/lib/api';
+import { showToast } from '@/lib/toast';
+import { PageLoader, CardSkeleton, LoadingButton } from '@/components/LoadingStates';
+import { ConfirmationModal } from '@/components/ConfirmationModal';
 
 interface Application {
   id: string;
@@ -43,6 +46,9 @@ export default function ResourcesPage() {
   const [creating, setCreating] = useState(false);
   const [selectedResource, setSelectedResource] = useState<string | null>(null);
   const [actions, setActions] = useState<{ [key: string]: Action[] }>({});
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [resourceToDelete, setResourceToDelete] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -64,7 +70,7 @@ export default function ResourcesPage() {
       const data = await apiClient.get('/api/v1/applications/');
       setApplications(data.applications || []);
     } catch (error) {
-      console.error('Error loading applications:', error);
+      showToast.error('Failed to load applications');
     }
   };
 
@@ -74,7 +80,7 @@ export default function ResourcesPage() {
       const data = await apiClient.get('/api/v1/resources/');
       setResources(data.resources || []);
     } catch (error) {
-      console.error('Error loading resources:', error);
+      showToast.error('Failed to load resources');
     } finally {
       setLoading(false);
     }
@@ -85,7 +91,7 @@ export default function ResourcesPage() {
       const data = await apiClient.get(`/api/v1/actions/?resource_id=${resourceId}`);
       setActions(prev => ({ ...prev, [resourceId]: data.actions || [] }));
     } catch (error) {
-      console.error('Error loading actions:', error);
+      showToast.error('Failed to load actions');
     }
   };
 
@@ -104,25 +110,33 @@ export default function ResourcesPage() {
         description: '',
         is_active: true
       });
+      showToast.success('Resource created successfully');
     } catch (error) {
-      console.error('Error creating resource:', error);
-      alert('Failed to create resource');
+      showToast.error('Failed to create resource');
     } finally {
       setCreating(false);
     }
   };
 
-  const handleDeleteResource = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this resource? This will also delete all associated actions.')) {
-      return;
-    }
+  const handleDeleteResource = (id: string) => {
+    setResourceToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDeleteResource = async () => {
+    if (!resourceToDelete) return;
 
     try {
-      await apiClient.delete(`/api/v1/resources/${id}`);
-      setResources(resources.filter(res => res.id !== id));
+      setDeleting(true);
+      await apiClient.delete(`/api/v1/resources/${resourceToDelete}`);
+      setResources(resources.filter(res => res.id !== resourceToDelete));
+      showToast.success('Resource deleted successfully');
+      setShowDeleteModal(false);
+      setResourceToDelete(null);
     } catch (error) {
-      console.error('Error deleting resource:', error);
-      alert('Failed to delete resource');
+      showToast.error('Failed to delete resource');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -188,9 +202,7 @@ export default function ResourcesPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          </div>
+          <PageLoader />
         ) : filteredResources.length === 0 ? (
           <div className="text-center py-12">
             <Shield className="mx-auto h-12 w-12 text-gray-400" />
@@ -371,18 +383,35 @@ export default function ResourcesPage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50"
-                  disabled={creating}
-                >
-                  {creating ? 'Creating...' : 'Create Resource'}
-                </button>
+                 <LoadingButton
+                   type="submit"
+                   loading={creating}
+                   className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
+                 >
+                   {creating ? '' : 'Create Resource'}
+                 </LoadingButton>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          if (!deleting) {
+            setShowDeleteModal(false);
+            setResourceToDelete(null);
+          }
+        }}
+        onConfirm={confirmDeleteResource}
+        title="Delete Resource"
+        message="Are you sure you want to delete this resource? This will also delete all associated actions. This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        loading={deleting}
+      />
     </DashboardLayout>
   );
 }

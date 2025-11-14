@@ -1,210 +1,353 @@
 """
-Policy management router
+Policy router for Cedar policy management
 """
 
-import sys
-import os
-
-# Add parent directory to Python path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from datetime import datetime
 import logging
 
-import database
-import models.policy
+from database_pg import get_db
+from models.policy import Policy, PolicyStatus
+from models.user import User
+from schemas.policy import (
+    PolicyCreate, PolicyUpdate, PolicyResponse, PolicyListResponse,
+    PolicyValidationRequest, PolicyValidationResponse
+)
+from dependencies import get_current_user
 
 logger = logging.getLogger(__name__)
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/policies", tags=["policies"])
 
 
-@router.get("/", response_model=List[models.policy.PolicyResponse])
-async def list_policies(
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(database.get_db)
+@router.post("/", response_model=PolicyResponse, status_code=status.HTTP_201_CREATED)
+async def create_policy(
+    policy_data: PolicyCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """List all policies"""
-    policies = db.query(models.policy.Policy).offset(skip).limit(limit).all()
-    return policies
+    """Create a new Cedar policy"""
+    
+    # Only admins can create policies
+    if current_user.role.value != 'admin':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can create policies"
+        )
+    
+    # Check if policy name already exists
+    existing_policy = db.query(Policy).filter(Policy.name == policy_data.name).first()
+    if existing_policy:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Policy name already exists"
+        )
+    
+    # Create policy
+    db_policy = Policy(
+        name=policy_data.name,
+        description=policy_data.description,
+        content=policy_data.content,
+        version="1.0.0",
+        status=PolicyStatus.DRAFT
+    )
+    
+    db.add(db_policy)
+    db.commit()
+    db.refresh(db_policy)
+    
+    logger.info(f"Policy {db_policy.id} created successfully")
+    return db_policy
 
 
-@router.get("/{policy_id}", response_model=models.policy.PolicyResponse)
+@router.get("/", response_model=PolicyListResponse)
+async def list_policies(
+    skip: int = Query(0, ge=0, description="Number of policies to skip"),
+    limit: int = Query(10, ge=1, le=100, description="Maximum number of policies to return"),
+    status: Optional[PolicyStatus] = Query(None, description="Filter by policy status"),
+    search: Optional[str] = Query(None, description="Search by name or description"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """List policies with pagination and filters"""
+    
+    # Build query
+    query = db.query(Policy)
+    
+    # Apply filters
+    if status:
+        query = query.filter(Policy.status == status)
+    if search:
+        query = query.filter(
+            (Policy.name.ilike(f"%{search}%")) |
+            (Policy.description.ilike(f"%{search}%"))
+        )
+    
+    # Count total
+    total = query.count()
+    
+    # Apply pagination
+    policies = query.offset(skip).limit(limit).all()
+    
+    return PolicyListResponse(
+        policies=policies,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
+
+
+@router.get("/{policy_id}", response_model=PolicyResponse)
 async def get_policy(
     policy_id: int,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """Get a specific policy by ID"""
-    policy = db.query(models.policy.Policy).filter(models.policy.Policy.id == policy_id).first()
+    """Get policy by ID"""
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
     if not policy:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Policy not found"
         )
+    
     return policy
 
 
-@router.post("/", response_model=models.policy.PolicyResponse, status_code=status.HTTP_201_CREATED)
-async def create_policy(
-    policy: models.policy.PolicyCreate,
-    db: Session = Depends(database.get_db)
-):
-    """Create a new policy"""
-    try:
-        # Create policy in database
-        db_policy = models.policy.Policy(
-            name=policy.name,
-            description=policy.description,
-            content=policy.content,
-            version="1.0.0",
-            status="draft",
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow()
-        )
-        
-        db.add(db_policy)
-        db.commit()
-        db.refresh(db_policy)
-        
-        # Notify OPAL about policy update
-        # OPAL service will be integrated later
-        logger.info(f"Policy {db_policy.id} created successfully")
-        
-        return db_policy
-        
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error creating policy: {e}")
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to create policy"
-        )
-
-
-@router.put("/{policy_id}", response_model=models.policy.PolicyResponse)
+@router.put("/{policy_id}", response_model=PolicyResponse)
 async def update_policy(
     policy_id: int,
-    policy_update: models.policy.PolicyUpdate,
-    db: Session = Depends(database.get_db)
+    policy_data: PolicyUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Update an existing policy"""
-    try:
-        db_policy = db.query(models.policy.Policy).filter(models.policy.Policy.id == policy_id).first()
-        if not db_policy:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
-            )
-        
-        # Update policy fields
-        update_data = policy_update.dict(exclude_unset=True)
-        for field, value in update_data.items():
-            setattr(db_policy, field, value)
-        
-        db_policy.updated_at = datetime.utcnow()
-        
-        # Increment version if content changed
-        if "content" in update_data:
-            current_version = db_policy.version.split(".")
-            current_version[-1] = str(int(current_version[-1]) + 1)
-            db_policy.version = ".".join(current_version)
-        
-        db.commit()
-        db.refresh(db_policy)
-        
-        # Notify OPAL about policy update
-        # OPAL service will be integrated later
-        logger.info(f"Policy {db_policy.id} updated successfully")
-        
-        return db_policy
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error updating policy: {e}")
+    
+    # Only admins can update policies
+    if current_user.role.value != 'admin':
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update policy"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can update policies"
         )
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Policy not found"
+        )
+    
+    # Check if new name conflicts with existing policies
+    if policy_data.name and policy_data.name != policy.name:
+        existing_policy = db.query(Policy).filter(Policy.name == policy_data.name).first()
+        if existing_policy:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Policy name already exists"
+            )
+    
+    # Update fields
+    update_data = policy_data.dict(exclude_unset=True)
+    for field, value in update_data.items():
+        setattr(policy, field, value)
+    
+    # Increment version if content changed
+    if policy_data.content:
+        current_version = policy.version.split(".")
+        current_version[-1] = str(int(current_version[-1]) + 1)
+        policy.version = ".".join(current_version)
+    
+    policy.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(policy)
+    
+    logger.info(f"Policy {policy_id} updated successfully")
+    return policy
 
 
 @router.delete("/{policy_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_policy(
     policy_id: int,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Delete a policy"""
-    try:
-        db_policy = db.query(models.policy.Policy).filter(models.policy.Policy.id == policy_id).first()
-        if not db_policy:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
-            )
-        
-        # Store policy info for OPAL notification
-        policy_info = {
-            "id": db_policy.id,
-            "name": db_policy.name
-        }
-        
-        # Delete from database
-        db.delete(db_policy)
-        db.commit()
-        
-        # Notify OPAL about policy deletion
-        # OPAL service will be integrated later
-        logger.info(f"Policy {policy_id} deleted successfully")
-        
-        return None
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error deleting policy: {e}")
+    
+    # Only admins can delete policies
+    if current_user.role.value != 'admin':
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete policy"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can delete policies"
         )
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Policy not found"
+        )
+    
+    # Don't allow deletion of active policies
+    if policy.status == PolicyStatus.ACTIVE:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete active policy. Deactivate it first."
+        )
+    
+    db.delete(policy)
+    db.commit()
+    
+    logger.info(f"Policy {policy_id} deleted successfully")
 
 
-@router.post("/{policy_id}/publish", response_model=models.policy.PolicyResponse)
+@router.post("/{policy_id}/publish", response_model=PolicyResponse)
 async def publish_policy(
     policy_id: int,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     """Publish a policy (make it active)"""
-    try:
-        db_policy = db.query(models.policy.Policy).filter(models.policy.Policy.id == policy_id).first()
-        if not db_policy:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Policy not found"
-            )
-        
-        db_policy.status = "active"
-        db_policy.updated_at = datetime.utcnow()
-        
-        db.commit()
-        db.refresh(db_policy)
-        
-        # Force OPAL notification
-        # OPAL service will be integrated later
-        logger.info(f"Policy {policy_id} published successfully")
-        
-        return db_policy
-        
-    except HTTPException:
-        raise
-    except Exception as e:
-        db.rollback()
-        logger.error(f"Error publishing policy: {e}")
+    
+    # Only admins can publish policies
+    if current_user.role.value != 'admin':
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to publish policy"
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can publish policies"
         )
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Policy not found"
+        )
+    
+    policy.status = PolicyStatus.ACTIVE
+    policy.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(policy)
+    
+    logger.info(f"Policy {policy_id} published successfully")
+    return policy
+
+
+@router.post("/{policy_id}/deactivate", response_model=PolicyResponse)
+async def deactivate_policy(
+    policy_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Deactivate a policy"""
+    
+    # Only admins can deactivate policies
+    if current_user.role.value != 'admin':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only admins can deactivate policies"
+        )
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Policy not found"
+        )
+    
+    policy.status = PolicyStatus.INACTIVE
+    policy.updated_at = datetime.utcnow()
+    db.commit()
+    db.refresh(policy)
+    
+    logger.info(f"Policy {policy_id} deactivated successfully")
+    return policy
+
+
+@router.post("/validate", response_model=PolicyValidationResponse)
+async def validate_policy(
+    validation_request: PolicyValidationRequest,
+    current_user: User = Depends(get_current_user)
+):
+    """Validate Cedar policy syntax"""
+    
+    # Basic Cedar policy validation (simplified)
+    errors = []
+    warnings = []
+    
+    content = validation_request.content.strip()
+    
+    # Check if content is empty
+    if not content:
+        errors.append("Policy content cannot be empty")
+        return PolicyValidationResponse(valid=False, errors=errors, warnings=warnings)
+    
+    # Basic Cedar syntax checks
+    if not content.startswith("policy"):
+        errors.append("Policy must start with 'policy' keyword")
+    
+    if "permit" not in content and "forbid" not in content:
+        warnings.append("Policy should contain at least one 'permit' or 'forbid' rule")
+    
+    if "principal" not in content:
+        warnings.append("Policy should reference 'principal' for proper access control")
+    
+    if "action" not in content:
+        warnings.append("Policy should reference 'action' for proper access control")
+    
+    if "resource" not in content:
+        warnings.append("Policy should reference 'resource' for proper access control")
+    
+    # Check for balanced braces
+    open_braces = content.count("{")
+    close_braces = content.count("}")
+    if open_braces != close_braces:
+        errors.append(f"Unbalanced braces: {open_braces} open, {close_braces} close")
+    
+    # Check for semicolon at end of statements
+    lines = content.split("\n")
+    for i, line in enumerate(lines, 1):
+        line = line.strip()
+        if line and not line.startswith("//") and not line.endswith("{"):
+            if any(keyword in line for keyword in ["permit", "forbid", "when", "unless"]):
+                warnings.append(f"Line {i}: Statement may be missing semicolon")
+    
+    valid = len(errors) == 0
+    
+    return PolicyValidationResponse(
+        valid=valid,
+        errors=errors,
+        warnings=warnings
+    )
+
+
+@router.get("/{policy_id}/export")
+async def export_policy(
+    policy_id: int,
+    format: str = Query("cedar", description="Export format: cedar, json"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Export policy in specified format"""
+    
+    policy = db.query(Policy).filter(Policy.id == policy_id).first()
+    if not policy:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Policy not found"
+        )
+    
+    if format.lower() == "json":
+        return {
+            "id": policy.id,
+            "name": policy.name,
+            "description": policy.description,
+            "content": policy.content,
+            "version": policy.version,
+            "status": policy.status.value,
+            "created_at": policy.created_at.isoformat() if policy.created_at else None,
+            "updated_at": policy.updated_at.isoformat() if policy.updated_at else None
+        }
+    else:
+        # Default to Cedar format
+        return policy.content

@@ -1,0 +1,192 @@
+{
+  "id": "sentinela",
+  "realm": "sentinela",
+  "displayName": "Sentinela IAM",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
+  "roles": {
+    "realm": [
+      {
+        "id": "admin-role",
+        "name": "admin",
+        "description": "Administrator role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "sentinela"
+      },
+      {
+        "id": "employee-role", 
+        "name": "employee",
+        "description": "Employee role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "sentinela"
+      },
+      {
+        "id": "manager-role",
+        "name": "manager", 
+        "description": "Manager role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "sentinela"
+      }
+    ]
+  },
+  "users": [
+    {
+      "id": "admin-user",
+      "createdTimestamp": 1699123456789,
+      "username": "admin",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": true,
+      "firstName": "Administrator",
+      "lastName": "User",
+      "email": "admin@sentinela.com",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "notBefore": 0,
+      "access": {
+        "manageGroupMembership": false,
+        "view": false,
+        "mapRoles": false,
+        "impersonate": false,
+        "manage": false
+      },
+      "credentials": [{
+        "id": "admin-cred",
+        "type": "password",
+        "createdDate": 1699123456789,
+        "secretData": "{\"value\":\"admin123\",\"salt\":\"salt\",\"additionalParameters\":{}}",
+        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}",
+        "temporary": false
+      }],
+      "realmRoles": ["admin", "manager", "employee"]
+    },
+    {
+      "id": "alice-user",
+      "createdTimestamp": 1699123456789,
+      "username": "alice",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": true,
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "email": "alice@sentinela.com",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "notBefore": 0,
+      "access": {
+        "manageGroupMembership": false,
+        "view": false,
+        "mapRoles": false,
+        "impersonate": false,
+        "manage": false
+      },
+      "credentials": [{
+        "id": "alice-cred",
+        "type": "password",
+        "createdDate": 1699123456789,
+        "secretData": "{\"value\":\"alice123\",\"salt\":\"salt\",\"additionalParameters\":{}}",
+        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}",
+        "temporary": false
+      }],
+      "realmRoles": ["employee"]
+    },
+    {
+      "id": "bob-user",
+      "createdTimestamp": 1699123456789,
+      "username": "bob",
+      "enabled": true,
+      "totp": false,
+      "emailVerified": true,
+      "firstName": "Bob",
+      "lastName": "Johnson",
+      "email": "bob@sentinela.com",
+      "disableableCredentialTypes": [],
+      "requiredActions": [],
+      "notBefore": 0,
+      "access": {
+        "manageGroupMembership": false,
+        "view": false,
+        "mapRoles": false,
+        "impersonate": false,
+        "manage": false
+      },
+      "credentials": [{
+        "id": "bob-cred",
+        "type": "password",
+        "createdDate": 1699123456789,
+        "secretData": "{\"value\":\"bob123\",\"salt\":\"salt\",\"additionalParameters\":{}}",
+        "credentialData": "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}",
+        "temporary": false
+      }],
+      "realmRoles": ["manager", "employee"]
+    }
+  ],
+  "clients": [
+    {
+      "id": "sentinela-api",
+      "clientId": "sentinela-api",
+      "name": "Sentinela API",
+      "description": "API client for Sentinela applications",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "sentinela-secret",
+      "redirectUris": ["http://localhost:3000/*", "http://localhost:8001/*", "http://localhost:8002/*"],
+      "webOrigins": ["http://localhost:3000", "http://localhost:8001", "http://localhost:8002"],
+      "bearerOnly": false,
+      "consentRequired": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": false,
+      "protocol": "openid-connect",
+      "attributes": {
+        "saml.assertion.signature": "false",
+        "saml.multivalued.roles": "false",
+        "saml.force.post.binding": "false",
+        "saml.encrypt": "false",
+        "saml.server.signature": "false",
+        "saml.server.signature.keyinfo.ext": "false",
+        "exclude.session.state.from.auth.response": "false",
+        "saml_force_name_id_format": "false",
+        "saml.client.signature": "false",
+        "tls.client.certificate.bound.access.tokens": "false",
+        "saml.authnstatement": "false",
+        "display.on.consent.screen": "false",
+        "saml.onetimeuse.condition": "false"
+      },
+      "fullScopeAllowed": true,
+      "nodeReRegistrationTimeout": -1,
+      "defaultClientScopes": [
+        "web-origins",
+        "role_list",
+        "roles",
+        "profile",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ]
+    }
+  ]
+}

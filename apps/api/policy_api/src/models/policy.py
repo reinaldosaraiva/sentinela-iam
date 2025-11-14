@@ -9,11 +9,10 @@ from datetime import datetime
 from typing import Optional
 import enum
 
-# Import database directly
-import sys
-import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from database import Base
+try:
+    from ..database_pg import Base
+except ImportError:
+    from database_pg import Base
 
 
 class PolicyStatus(str, enum.Enum):
@@ -36,7 +35,7 @@ class Policy(Base):
     version = Column(String(50), nullable=False, default="1.0.0")
     status = Column(Enum(PolicyStatus), nullable=False, default=PolicyStatus.DRAFT)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
     
     def __repr__(self):
         return f"<Policy(id={self.id}, name='{self.name}', status='{self.status}')>"
